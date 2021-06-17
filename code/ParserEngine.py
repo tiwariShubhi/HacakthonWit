@@ -11,36 +11,42 @@ from cloudant.query import Query
 from cloudant.query import QueryResult
 import time
 
+
+# Global Data
+
 # -------------------------------------------------------------------------------
-# To find all recipes in db
-# in:
-# out :
+# To find all recipes, primary and secondary ing.  in db
+# in: recipe database object
+# out : primary and secondary ing. as set()
 # --------------------------------------------------------------------------------
 def find_all_recipes(recipeDb):
-    # method 1
-    # query = Query(database=recipeDb)
-    # result_collection = QueryResult(query)
-    # print("Resultset size "+ len(result_collection) )
-    # print("Retrieved minimal document:\n{0}\n".format(result_collection[0]))
-
-    # method 2
-    # for recipe in recipeDb:
-    #     print(recipe)
+    primary = set()
+    secondary = set()
     count = 0
     result_collection = Result(recipeDb.all_docs, include_docs=True)
     for recipe in result_collection:
-        print(recipe)
+        #print(recipe["doc"]["primary_ingredients"])
+
+        for ingredient in recipe["doc"]["primary_ingredients"]:
+            primary.add(ingredient)
+
+        for ingredient in recipe["doc"]["secondary_ingredients"]:
+            secondary.add(ingredient)
+
         count += 1
         if count > 400 :
             time.sleep(1)
             count = 0
+
+    return primary,secondary
 # -------------------------------------------------------------------------------
 # To find all recipes in db
 # in:
 # out :
 # --------------------------------------------------------------------------------
-def find_all_primary_ingredients():
-    print("here")
+#def find_all_primary_ingredients():
+    #for recipe in result_collection:
+
 
 
 # -------------------------------------------------------------------------------
@@ -86,7 +92,10 @@ databaseName = "recipedata2"
 # open db
 recipeDb = client[databaseName]
 
-find_all_recipes(recipeDb)
+primary, secondary = find_all_recipes(recipeDb)
+print(primary)
+print(len(primary))
 
-
+print(secondary)
+print(len(secondary))
 client.disconnect()
