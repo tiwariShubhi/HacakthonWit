@@ -39,14 +39,6 @@ def find_all_recipes(recipeDb):
             count = 0
 
     return primary,secondary
-# -------------------------------------------------------------------------------
-# To find all recipes in db
-# in:
-# out :
-# --------------------------------------------------------------------------------
-#def find_all_primary_ingredients():
-    #for recipe in result_collection:
-
 
 
 # -------------------------------------------------------------------------------
@@ -54,21 +46,25 @@ def find_all_recipes(recipeDb):
 # in:
 # out :
 # --------------------------------------------------------------------------------
-def find_all_secondary_ingredients():
-    print("here")
-
-
-# -------------------------------------------------------------------------------
-# To find all recipes in db
-# in:
-# out :
-# --------------------------------------------------------------------------------
-def search_by_primary_ingredients():
-    print("here")
-
-
-def search_by_secondary_ingredients():
-    print("here")
+def search_by_primary_ingredients(recipeDb,primary_ingredients):
+    result_collection = Result(recipeDb.all_docs, include_docs=True)
+    timer=0
+    final_recipe = []
+    for recipe in result_collection:
+        count =0
+        for ing in primary_ingredients:
+            if ing in recipe['doc']['primary_ingredients']:
+                count+=1
+        if count>0:
+            recipe['doc']['score']=count
+            recipe['score']=count
+            final_recipe.append(recipe)
+        timer+= 1
+        if timer> 400:
+            time.sleep(1)
+            timer= 0
+    final_recipe = sorted(final_recipe, key = lambda i: i['score'],reverse=True)
+    return final_recipe
 
 
 
@@ -92,10 +88,10 @@ databaseName = "recipedata2"
 # open db
 recipeDb = client[databaseName]
 
-primary, secondary = find_all_recipes(recipeDb)
-print(primary)
-print(len(primary))
+#primary, secondary = find_all_recipes(recipeDb)
 
-print(secondary)
-print(len(secondary))
+primary_ing = ['curd','milk']
+res = search_by_primary_ingredients(recipeDb,primary_ing)
+print(res)
+print(len(res))
 client.disconnect()
